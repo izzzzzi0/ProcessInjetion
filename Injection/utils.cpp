@@ -1,20 +1,14 @@
-#include <windows.h>
-#include <tlhelp32.h>
-#include <tchar.h>
-#include <atlstr.h>  
-
+#include "default.h"
 #include "utils.h"
 
-// msdn : https://docs.microsoft.com/ko-kr/windows/win32/toolhelp/taking-a-snapshot-and-viewing-processes
-
-DWORD FindProcessID(LPCTSTR ProcessName) {
+DWORD FindProcessID(LPCTSTR processName) {
 	HANDLE hProcessSnap;
 	PROCESSENTRY32 pe32;
 
 	hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if (hProcessSnap == INVALID_HANDLE_VALUE) {
 		printError(TEXT("CreateToolhelp32Snapshot (of processes)"));
-		return 0;
+		return 0xFFFFFF;
 	}
 
 	pe32.dwSize = sizeof(PROCESSENTRY32);
@@ -22,25 +16,20 @@ DWORD FindProcessID(LPCTSTR ProcessName) {
 	if (!Process32First(hProcessSnap, &pe32)) {
 		printError(TEXT("Process32Fisrt"));
 		CloseHandle(hProcessSnap);
-		return 0;
+		return 0xFFFFFF;
 	}
-
-	do
-	{
-		CString pe32ProccessName = pe32.szExeFile;
-		if (!pe32ProccessName.CompareNoCase(ProcessName)) {
+	do{
+		LPCTSTR tmp = pe32.szExeFile;
+		if (!_tcsicmp(processName, pe32.szExeFile)){
 			CloseHandle(hProcessSnap);
-			return pe32.th32ParentProcessID;
+			return pe32.th32ProcessID;
 		}
 	} while (Process32Next(hProcessSnap, &pe32));
 
 	CloseHandle(hProcessSnap);
-	return(0);
+	return 0xFFFFFF;
 }
-
-
-void printError(LPCTSTR msg)
-{
+void printError(LPCTSTR msg){
 	DWORD eNum;
 	TCHAR sysMsg[256];
 	TCHAR* p;
