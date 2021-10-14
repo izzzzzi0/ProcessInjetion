@@ -1,7 +1,5 @@
 #include "utils.h" 
 #include "default.h"
-//C:\\Users\\Administrator\\source\\repos\\myhack\\Release\\myhack.dll"
-
 
 BOOL DLLInjection(DWORD dwPID, LPCTSTR dllPath) {
 	HANDLE hProcess=NULL, hThread=NULL;
